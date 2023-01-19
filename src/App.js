@@ -1,5 +1,3 @@
-import logo from "./logo.svg";
-import "./App.css";
 import CustomRoutes from "./Routes";
 
 function App() {
