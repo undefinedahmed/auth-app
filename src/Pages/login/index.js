@@ -10,17 +10,47 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Axios from "../../api.js";
+import CustomSnackbar from "../../Components/Snackbar/index.js";
+import { useHistory } from "react-router-dom";
 
 const theme = createTheme();
 
 export default function Login() {
+  const history = useHistory();
+  const [snackbarData, setSnackbarData] = React.useState({
+    open: false,
+    type: "",
+    message: "",
+  });
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
+    let dataObj = {
       email: data.get("email"),
       password: data.get("password"),
-    });
+    };
+    Axios.post("login", dataObj)
+      .then((res) => {
+        console.log("Resp", res.data);
+        localStorage.setItem("token_auth", res.data.refreshToken);
+        localStorage.setItem("token_auth_access", res.data.accessToken);
+        history.goBack("/");
+      })
+      .catch((e) => {
+        console.log(e);
+        setSnackbarData({
+          ...snackbarData,
+          open: true,
+          message: e?.response?.data?.message || "Something Went Wrong!",
+          type: "error",
+        });
+      });
+  };
+
+  const closeSnackbar = () => {
+    setSnackbarData({ ...snackbarData, open: !snackbarData.open });
   };
 
   return (
@@ -41,12 +71,7 @@ export default function Login() {
           <Typography component="h1" variant="h5">
             Login
           </Typography>
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            noValidate
-            sx={{ mt: 1 }}
-          >
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
               margin="normal"
               required
@@ -54,7 +79,7 @@ export default function Login() {
               id="email"
               label="Email Address"
               name="email"
-              autoComplete="email"
+              // autoComplete="email"
               autoFocus
             />
             <TextField
@@ -65,14 +90,21 @@ export default function Login() {
               label="Password"
               type="password"
               id="password"
-              autoComplete="current-password"
+              // autoComplete="current-password"
             />
 
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{
+                mt: 3,
+                mb: 2,
+                bgcolor: "secondary.main",
+                "&:hover": {
+                  backgroundColor: "secondary.main",
+                },
+              }}
             >
               Login
             </Button>
@@ -91,6 +123,12 @@ export default function Login() {
           </Box>
         </Box>
       </Container>
+      <CustomSnackbar
+        open={snackbarData.open}
+        close={closeSnackbar}
+        type={snackbarData.type}
+        message={snackbarData.message}
+      />
     </ThemeProvider>
   );
 }

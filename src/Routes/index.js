@@ -1,5 +1,12 @@
 import * as React from "react";
-import { Switch, Route, BrowserRouter, Redirect } from "react-router-dom";
+import {
+  Switch,
+  Route,
+  // BrowserRouter as Router,
+  Router,
+  Redirect,
+} from "react-router-dom";
+import { createBrowserHistory } from "history";
 import Home from "../Pages/home";
 import Login from "../Pages/login";
 import Signup from "../Pages/signup";
@@ -22,7 +29,7 @@ function PublicRoute({ children, isAuthenticated, ...rest }) {
         ) : (
           <Redirect
             to={{
-              pathname: "/home",
+              pathname: "/",
               state: { from: location },
             }}
           />
@@ -51,10 +58,11 @@ function PrivateRoute({ children, isAuthenticated, ...rest }) {
     />
   );
 }
+const history = createBrowserHistory();
 
 function CustomRoutes() {
   return (
-    <BrowserRouter>
+    <Router history={history}>
       <Switch>
         <PublicRoute path="/login" isAuthenticated={isAuthenticated()}>
           <Login />
@@ -67,7 +75,7 @@ function CustomRoutes() {
           <Home />
         </PrivateRoute>
       </Switch>
-    </BrowserRouter>
+    </Router>
   );
 }
 export default CustomRoutes;
