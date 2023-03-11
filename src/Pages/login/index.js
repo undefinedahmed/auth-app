@@ -3,7 +3,6 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -12,31 +11,45 @@ import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Axios from "../../api.js";
 import CustomSnackbar from "../../Components/Snackbar/index.js";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+import Identifiers from "../../Components/Identifiers/index.js";
 
 const theme = createTheme();
 
 export default function Login() {
-  const history = useHistory();
+  const navigate = useNavigate();
   const [snackbarData, setSnackbarData] = React.useState({
     open: false,
     type: "",
     message: "",
   });
+  const [identifier, setIdentifier] = React.useState("");
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (!identifier) {
+      setSnackbarData({
+        ...snackbarData,
+        open: true,
+        message: "Please select the identifier too!",
+        type: "error",
+      });
+      return;
+    }
     const data = new FormData(event.currentTarget);
     let dataObj = {
       email: data.get("email"),
       password: data.get("password"),
+      identifier,
     };
     Axios.post("login", dataObj)
       .then((res) => {
         console.log("Resp", res.data);
         localStorage.setItem("token_auth", res.data.refreshToken);
         localStorage.setItem("token_auth_access", res.data.accessToken);
-        history.goBack("/");
+        setIdentifier("");
+        navigate("/");
       })
       .catch((e) => {
         console.log(e);
@@ -53,6 +66,9 @@ export default function Login() {
     setSnackbarData({ ...snackbarData, open: !snackbarData.open });
   };
 
+  const identifierChangeHandler = (name) => setIdentifier(name);
+
+  // #e3f2fd
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
@@ -65,7 +81,7 @@ export default function Login() {
             alignItems: "center",
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+          <Avatar sx={{ m: 1, bgcolor: "#673ab7" }}>
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
@@ -73,6 +89,8 @@ export default function Login() {
           </Typography>
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
+              color="secondary"
+              focused
               margin="normal"
               required
               fullWidth
@@ -83,14 +101,18 @@ export default function Login() {
               autoFocus
             />
             <TextField
+              color="secondary"
               margin="normal"
               required
               fullWidth
               name="password"
               label="Password"
-              type="password"
               id="password"
-              // autoComplete="current-password"
+              type="password"
+            />
+            <Identifiers
+              selectedIdentifier={identifier}
+              changeHandler={identifierChangeHandler}
             />
 
             <Button
@@ -98,26 +120,56 @@ export default function Login() {
               fullWidth
               variant="contained"
               sx={{
-                mt: 3,
                 mb: 2,
-                bgcolor: "secondary.main",
+                bgcolor: "#673ab7",
+                textTransform: "capitalize",
+                fontFamily: "Roboto, sans-serif",
+                fontSize: "0.9375rem",
+                boxShadow: "none",
+                fontWeight: "600",
+                borderRadius: "4px",
                 "&:hover": {
-                  backgroundColor: "secondary.main",
+                  backgroundColor: "#673ab7",
                 },
               }}
             >
               Login
             </Button>
+
             <Grid container justifyContent="flex-end">
-              {/* <Grid item xs>
-                <Link href="#" variant="body2">
+              <Grid item xs>
+                <Typography
+                  sx={{
+                    fontSize: "0.875rem",
+                    fontWeight: "600",
+                    fontFamily: "Roboto, sans-serif",
+                    lineHeight: "1.75",
+                    color: "rgb(103, 58, 183)",
+                    cursor: "pointer",
+                  }}
+                  variant="body2"
+                >
                   Forgot password?
-                </Link>
-              </Grid> */}
+                </Typography>
+              </Grid>
               <Grid item>
-                <Link href="/signup" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
+                <Typography
+                  sx={{
+                    fontSize: "0.875rem",
+                    fontWeight: "600",
+                    fontFamily: "Roboto, sans-serif",
+                    lineHeight: "1.75",
+                    color: "rgb(103, 58, 183)",
+                    cursor: "pointer",
+                  }}
+                  variant="body2"
+                  onClick={() => {
+                    // history.push("/signup");
+                    navigate("/sign-up");
+                  }}
+                >
+                  Don't have an account? Sign Up
+                </Typography>
               </Grid>
             </Grid>
           </Box>

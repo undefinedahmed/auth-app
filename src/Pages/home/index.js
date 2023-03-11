@@ -18,7 +18,8 @@ const theme = createTheme();
 const Home = () => {
   const [userData, setUserData] = React.useState([]);
   React.useEffect(() => {
-    getUserData();
+    console.log("Inside home");
+    // getUserData();
   }, []);
 
   const getUserData = async () => {
@@ -113,12 +114,16 @@ const Home = () => {
                 fullWidth
                 variant="contained"
                 sx={{
-                  maxWidth: "max-content",
-                  mt: 3,
                   mb: 2,
-                  bgcolor: "secondary.main",
+                  bgcolor: "#673ab7",
+                  textTransform: "capitalize",
+                  fontFamily: "Roboto, sans-serif",
+                  fontSize: "0.9375rem",
+                  boxShadow: "none",
+                  fontWeight: "600",
+                  borderRadius: "4px",
                   "&:hover": {
-                    backgroundColor: "secondary.main",
+                    backgroundColor: "#673ab7",
                   },
                 }}
               >

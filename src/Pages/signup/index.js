@@ -10,17 +10,46 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Identifiers from "../../Components/Identifiers";
+import { useNavigate } from "react-router-dom";
+import CustomSnackbar from "../../Components/Snackbar";
 
 const theme = createTheme();
 
 export default function SignUp() {
+  const [identifier, setIdentifier] = React.useState("");
+  const [snackbarData, setSnackbarData] = React.useState({
+    open: false,
+    type: "",
+    message: "",
+  });
+  const navigate = useNavigate();
+
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (!identifier) {
+      setSnackbarData({
+        ...snackbarData,
+        open: true,
+        message: "Please select the identifier too!",
+        type: "error",
+      });
+      return;
+    }
     const data = new FormData(event.currentTarget);
-    console.log({
+    let dataObj = {
       email: data.get("email"),
       password: data.get("password"),
-    });
+      firstName: data.get("firstName"),
+      lastName: data.get("lastName"),
+      identifier,
+    };
+    console.log(dataObj);
+  };
+
+  const identifierChangeHandler = (name) => setIdentifier(name);
+  const closeSnackbar = () => {
+    setSnackbarData({ ...snackbarData, open: !snackbarData.open });
   };
 
   return (
@@ -35,7 +64,7 @@ export default function SignUp() {
             alignItems: "center",
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+          <Avatar sx={{ m: 1, bgcolor: "#673ab7" }}>
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
@@ -45,14 +74,14 @@ export default function SignUp() {
             component="form"
             noValidate
             onSubmit={handleSubmit}
-            sx={{ mt: 3 }}
+            sx={{ mt: 1 }}
           >
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  autoComplete="given-name"
                   name="firstName"
                   required
+                  margin="normal"
                   fullWidth
                   id="firstName"
                   label="First Name"
@@ -62,56 +91,59 @@ export default function SignUp() {
               <Grid item xs={12} sm={6}>
                 <TextField
                   required
+                  margin="normal"
                   fullWidth
                   id="lastName"
                   label="Last Name"
                   name="lastName"
-                  autoComplete="family-name"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  id="phone"
-                  label="Phone"
-                  name="phone"
-                  autoComplete="phone"
-                  type="number"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
                 />
               </Grid>
             </Grid>
+            <TextField
+              required
+              margin="normal"
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="phone"
+              label="Phone"
+              name="phone"
+              type="number"
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+            />
+            <Identifiers
+              selectedIdentifier={identifier}
+              changeHandler={identifierChangeHandler}
+            />
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{
-                mt: 3,
                 mb: 2,
-                bgcolor: "secondary.main",
+                bgcolor: "#673ab7",
+                textTransform: "capitalize",
+                fontFamily: "Roboto, sans-serif",
+                fontSize: "0.9375rem",
+                boxShadow: "none",
+                fontWeight: "600",
+                borderRadius: "4px",
                 "&:hover": {
-                  backgroundColor: "secondary.main",
+                  backgroundColor: "#673ab7",
                 },
               }}
             >
@@ -119,14 +151,33 @@ export default function SignUp() {
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="/login" variant="body2">
-                  Already have an account? Sign in
-                </Link>
+                <Typography
+                  sx={{
+                    fontSize: "0.875rem",
+                    fontWeight: "600",
+                    fontFamily: "Roboto, sans-serif",
+                    lineHeight: "1.75",
+                    color: "rgb(103, 58, 183)",
+                    cursor: "pointer",
+                  }}
+                  variant="body2"
+                  onClick={() => {
+                    navigate("/login");
+                  }}
+                >
+                  Already have an account? Login
+                </Typography>
               </Grid>
             </Grid>
           </Box>
         </Box>
       </Container>
+      <CustomSnackbar
+        open={snackbarData.open}
+        close={closeSnackbar}
+        type={snackbarData.type}
+        message={snackbarData.message}
+      />
     </ThemeProvider>
   );
 }
