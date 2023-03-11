@@ -8,6 +8,7 @@ function App() {
     let token = localStorage.getItem("token_auth");
     if (token) return true;
     return false;
+    // return true;
   };
 
   function PageNotFound() {

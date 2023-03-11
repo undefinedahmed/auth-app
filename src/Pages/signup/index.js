@@ -3,7 +3,6 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -13,11 +12,12 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Identifiers from "../../Components/Identifiers";
 import { useNavigate } from "react-router-dom";
 import CustomSnackbar from "../../Components/Snackbar";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
 const theme = createTheme();
 
 export default function SignUp() {
-  const [identifier, setIdentifier] = React.useState("");
+  const [userData, setUserData] = React.useState({});
   const [snackbarData, setSnackbarData] = React.useState({
     open: false,
     type: "",
@@ -27,11 +27,11 @@ export default function SignUp() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!identifier) {
+    if (!(userData.identifier && userData.gender)) {
       setSnackbarData({
         ...snackbarData,
         open: true,
-        message: "Please select the identifier too!",
+        message: "Please fill all fields!",
         type: "error",
       });
       return;
@@ -42,12 +42,17 @@ export default function SignUp() {
       password: data.get("password"),
       firstName: data.get("firstName"),
       lastName: data.get("lastName"),
-      identifier,
+      ...userData,
     };
     console.log(dataObj);
   };
 
-  const identifierChangeHandler = (name) => setIdentifier(name);
+  const identifierChangeHandler = (name) =>
+    setUserData({
+      ...userData,
+      identifier: name,
+    });
+
   const closeSnackbar = () => {
     setSnackbarData({ ...snackbarData, open: !snackbarData.open });
   };
@@ -107,6 +112,21 @@ export default function SignUp() {
               label="Email Address"
               name="email"
             />
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="demo-simple-select-label">Gender</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={userData.gender}
+                label="Gender"
+                onChange={(e) =>
+                  setUserData({ ...userData, gender: e.target.value })
+                }
+              >
+                <MenuItem value="male">Male</MenuItem>
+                <MenuItem value="female">Female</MenuItem>
+              </Select>
+            </FormControl>
             <TextField
               margin="normal"
               required
@@ -126,7 +146,7 @@ export default function SignUp() {
               id="password"
             />
             <Identifiers
-              selectedIdentifier={identifier}
+              selectedIdentifier={userData.identifier}
               changeHandler={identifierChangeHandler}
             />
             <Button

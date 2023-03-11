@@ -1,54 +1,78 @@
 import * as React from "react";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Axios from "../../api";
-import { Button } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardMedia,
+} from "@mui/material";
+import SimpleBackdrop from "../../Components/Loader";
+import MaleAvatar from "../../Assets/male.png";
+import FemaleAvatar from "../../Assets/female.png";
 
 const theme = createTheme();
 
 const Home = () => {
-  const [userData, setUserData] = React.useState([]);
+  const [userData, setUserData] = React.useState({
+    firstName: "Ahmed",
+    lastName: "Anis",
+    gender: "male",
+    email: "m.ahmed@gmail.com",
+    phone: "123456789",
+  });
+  const [loading, setLoading] = React.useState(false);
+
   React.useEffect(() => {
     console.log("Inside home");
     // getUserData();
   }, []);
 
   const getUserData = async () => {
+    setLoading(true);
+
     const config = {
       headers: {
         authorization: localStorage.getItem("token_auth_access"),
       },
     };
-    Axios.get("get-fake-users", config)
+    Axios.get("get-user-data", config)
       .then((res) => {
         if (res.status === 200) {
+          stopLoading();
           setUserData(res.data);
         }
       })
-      .catch((e) => console.log(e));
+      .catch((e) => {
+        stopLoading();
+        console.log("Error from get user data", e);
+      });
   };
 
   const getAccessToken = () => {
+    setLoading(true);
     let token = localStorage.getItem("token_auth");
     Axios.post("access-token", { token })
       .then((res) => {
+        stopLoading();
         console.log(res);
         localStorage.setItem("token_auth_access", res.data.accessToken);
         if (res.data.accessToken) {
           getUserData();
         }
       })
-      .catch((e) => console.log(e));
+      .catch((e) => {
+        stopLoading();
+        console.log("Error from get access token", e);
+      });
   };
+
+  const stopLoading = () => setLoading(false);
 
   return (
     <ThemeProvider theme={theme}>
@@ -62,56 +86,86 @@ const Home = () => {
             alignItems: "center",
           }}
         >
-          {userData && userData.length > 0 ? (
+          {userData ? (
             <>
-              <Typography component="h1" variant="h5">
-                User Data
-              </Typography>
-              <TableContainer>
-                <Table
-                  sx={{
-                    minWidth: 650,
-                    mt: 4,
-                    border: "1px solid rgba(224, 224, 224, 1)",
-                  }}
-                  aria-label="simple table"
-                >
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Name</TableCell>
-                      <TableCell align="right">Email</TableCell>
-                      <TableCell align="right">Phone</TableCell>
-                      <TableCell align="right">Website</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {userData.map((each) => (
-                      <TableRow
-                        key={each.id}
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell component="th" scope="row">
-                          {each.name}
-                        </TableCell>
-                        <TableCell align="right">{each.email}</TableCell>
-                        <TableCell align="right">{each.phone}</TableCell>
-                        <TableCell align="right">{each.website}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <Card
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  width: 700,
+                  borderLeft: "8px solid #673ab7",
+                  borderRadius: "0.5rem",
+                }}
+              >
+                <CardMedia
+                  component="img"
+                  sx={{ width: 250 }}
+                  image={userData.gender === "male" ? MaleAvatar : FemaleAvatar}
+                  alt="Live from space album cover"
+                />
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <CardContent sx={{ flex: "1 0 auto" }}>
+                    <Typography gutterBottom variant="h5" component="div">
+                      {userData.firstName} {userData.lastName}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {userData.email}
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      color="text.secondary"
+                      component="div"
+                    >
+                      {userData.phone}
+                    </Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Button
+                      onClick={() => {
+                        localStorage.removeItem("token_auth");
+                        localStorage.removeItem("token_auth_access");
+                        window.location.reload();
+                      }}
+                      fullWidth
+                      variant="contained"
+                      sx={{
+                        mb: 2,
+                        bgcolor: "#673ab7",
+                        textTransform: "capitalize",
+                        fontFamily: "Roboto, sans-serif",
+                        fontSize: "0.9375rem",
+                        boxShadow: "none",
+                        fontWeight: "600",
+                        borderRadius: "4px",
+                        "&:hover": {
+                          backgroundColor: "#673ab7",
+                        },
+                      }}
+                    >
+                      Logout
+                    </Button>
+                  </CardActions>
+                </Box>
+              </Card>
             </>
           ) : (
             <>
-              <Typography component="h1" variant="h5">
-                Token Invalid, Click The Below Button To Get New Token
+              <Typography
+                component="h1"
+                variant="h3"
+                sx={{ margin: "1rem 0 0rem 0", fontWeight: "bold" }}
+              >
+                Invalid <span style={{ color: "#673ab7" }}>Token</span>
+              </Typography>
+              <Typography
+                component="h1"
+                variant="h5"
+                sx={{ margin: "1rem 0 2rem 0" }}
+              >
+                Click The Below Button To Get New Token
               </Typography>
               <Button
                 onClick={getAccessToken}
-                fullWidth
                 variant="contained"
                 sx={{
                   mb: 2,
@@ -133,6 +187,7 @@ const Home = () => {
           )}
         </Box>
       </Container>
+      <SimpleBackdrop open={loading} close={stopLoading} />
     </ThemeProvider>
   );
 };
